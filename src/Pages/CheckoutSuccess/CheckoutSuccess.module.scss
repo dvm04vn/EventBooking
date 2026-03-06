@@ -1,0 +1,318 @@
+.wrapper {
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 34px 18px 56px;
+}
+
+/* Top center badge */
+.statusPill {
+  width: fit-content;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  color: rgba(134, 239, 172, 0.95);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.title {
+  text-align: center;
+  margin: 0;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.subtitle {
+  text-align: center;
+  margin: 10px auto 22px;
+  max-width: 680px;
+
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(226, 232, 240, 0.66);
+}
+
+/* grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* common card look */
+.card {
+  background: rgba(15, 23, 32, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.35);
+}
+
+.left {
+  display: grid;
+  gap: 14px;
+}
+
+.right {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 981px) {
+  .right {
+    position: sticky;
+    top: 18px;
+  }
+}
+
+/* E-ticket block */
+.ticket {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 16px;
+  padding: 14px;
+}
+
+.poster {
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(2, 6, 23, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.posterImg {
+  width: 100%;
+  height: 100%;
+}
+
+.ticketBody {
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.ticketTag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(56, 189, 248, 0.95);
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+
+.eventName {
+  font-size: 16px;
+  font-weight: 900;
+  color: rgba(248, 250, 252, 0.95);
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+
+.meta {
+  display: grid;
+  gap: 8px;
+}
+
+.metaRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.75);
+
+  svg {
+    color: rgba(226, 232, 240, 0.65);
+  }
+}
+
+@media (max-width: 560px) {
+  .ticket {
+    grid-template-columns: 1fr;
+  }
+  .poster {
+    width: 160px;
+  }
+}
+
+/* QR block */
+.qrBlock {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 14px;
+  padding: 14px;
+  align-items: center;
+}
+
+.qrTitle {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(226, 232, 240, 0.92);
+  margin-bottom: 6px;
+}
+
+.qrDesc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(226, 232, 240, 0.6);
+  margin-bottom: 10px;
+}
+
+.codePill {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(2, 132, 199, 0.12);
+  border: 1px solid rgba(2, 132, 199, 0.22);
+  color: rgba(56, 189, 248, 0.95);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+
+.qrBox {
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  display: grid;
+  place-items: center;
+}
+
+.qrFake {
+  width: 118px;
+  height: 118px;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(226, 232, 240, 0.2) 1px, transparent 1px),
+    linear-gradient(rgba(226, 232, 240, 0.2) 1px, transparent 1px);
+  background-size: 10px 10px;
+  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.12);
+}
+
+@media (max-width: 560px) {
+  .qrBlock {
+    grid-template-columns: 1fr;
+  }
+  .qrBox {
+    justify-self: start;
+  }
+}
+
+/* Side cards */
+.sideTitle {
+  padding: 14px 14px 0;
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.kv {
+  padding: 12px 14px 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.kvRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.kvLabel {
+  font-size: 11px;
+  color: rgba(226, 232, 240, 0.58);
+}
+
+.kvValue {
+  font-size: 11px;
+  color: rgba(226, 232, 240, 0.82);
+  font-weight: 700;
+}
+
+.kvValueStrong {
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.95);
+  font-weight: 900;
+}
+
+/* Actions */
+.actions {
+  padding: 12px 14px 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.primaryBtn {
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  background: #0ea5e9;
+  color: #fff;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+}
+
+.ghostBtn {
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: rgba(226, 232, 240, 0.88);
+}
+
+.backHome {
+  padding: 2px 14px 14px;
+  text-align: center;
+}
+
+.backLink {
+  font-size: 11px;
+  color: rgba(56, 189, 248, 0.9);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* A11y helper */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

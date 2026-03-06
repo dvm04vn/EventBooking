@@ -1,0 +1,35 @@
+:root {
+  --height-header-wrapper: 64px;
+  --width-sidebar-wrapper: 260px;
+  --mobile-nav-height: 60px;
+}
+
+.wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.container {
+  display: flex;
+  margin-top: var(--height-header-wrapper);
+  min-height: calc(100vh - var(--height-header-wrapper));
+  flex: 1;
+}
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--height-header-wrapper);
+  z-index: 100;
+
+  background: var(--background-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+}

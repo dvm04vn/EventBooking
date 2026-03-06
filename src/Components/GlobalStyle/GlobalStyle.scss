@@ -1,0 +1,128 @@
+@import "normalize.css";
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  /* base colors */
+  --white-color: #ffffff;
+  --black-color: #000000;
+
+  --Ebony-Clay: #1f2937;
+  --Alabaster: #f9f9f9;
+  --Alto: #dddddd;
+  --Amaranth: #e11d48;
+  --Athens-Gray: #e5e7eb;
+  --Boulder: #757575;
+  --Buttercup: #f1c40f;
+  --Catskill-White: #f1f5f9;
+  --Cinnabar: #e74c3c;
+  --Cod-Gray: #111111;
+  --Dove-Gray: #666666;
+  --Ebony: #0b1220;
+  --Gallery: #eeeeee;
+  --Gull-Gray: #94a3b8;
+  --Flamingo: #ef4444;
+  --Mine-Shaft: #222222;
+  --Mountain-Meadow: #1abc9c;
+
+  --header-height: 5.4rem;
+  --max-width-content: 80%;
+
+  /* semantic colors – light mode (default) */
+  --primary-color: #38bdf8;
+  --primary-color-hover: #0ea5e9;
+
+  --success-color: #22c55e;
+  --danger-color: var(--Flamingo);
+  --warning-color: var(--Buttercup);
+
+  --background-primary: var(--Catskill-White);
+  --background-secondary: var(--white-color);
+  --text-primary: var(--Ebony-Clay);
+  --text-secondary: var(--Boulder);
+  --border-color: var(--Athens-Gray);
+  --accent-color: var(--Amaranth);
+
+  --surface-elevated: #0b1220;
+  --header-background: #020617;
+}
+
+/* dark mode (html.dark) */
+html.dark {
+  --background-primary: var(--Ebony);
+  --background-secondary: var(--Ebony);
+  --text-primary: var(--Catskill-White);
+  --text-secondary: var(--Gull-Gray);
+  --border-color: var(--Ebony-Clay);
+  --accent-color: var(--Amaranth);
+  --surface-elevated: #020617;
+  --header-background: #020617;
+}
+
+/* system prefers dark */
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    --background-primary: var(--Ebony);
+    --background-secondary: var(--Ebony);
+    --text-primary: var(--Catskill-White);
+    --text-secondary: var(--Gull-Gray);
+    --border-color: var(--Ebony-Clay);
+    --accent-color: var(--Amaranth);
+    --surface-elevated: #020617;
+    --header-background: #020617;
+  }
+}
+
+html {
+  font-size: 62.5%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: "Roboto", sans-serif;
+  background: var(--background-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* reset đơn giản cho control */
+
+button,
+a,
+input {
+  border: none;
+  outline: none;
+  text-decoration: none;
+  background: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* giúp hình ảnh không tràn */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}

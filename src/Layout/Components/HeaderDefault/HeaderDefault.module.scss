@@ -1,0 +1,261 @@
+.wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.container {
+  height: 64px;
+  padding: 0 96px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* Responsive for tablet and below */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 24px;
+  }
+}
+
+/* Logo Styling */
+.logoLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoImg {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.logoText {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: var(--white-color);
+}
+
+/* Nav Styling */
+.nav {
+  // flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+}
+
+.navItem {
+  font-size: 1.35rem;
+  color: var(--text-secondary); /* nhạt */
+  text-decoration: none;
+  padding: 4px 0;
+  position: relative;
+  transition:
+    color 0.15s ease,
+    transform 0.3s ease;
+}
+
+.navItem:hover {
+  color: var(--white-color);
+  transform: scale(1.05); /* Slight scale-up effect on hover */
+}
+
+.navItemActive {
+  color: #38bdf8; /* cyan-400 */
+}
+
+/* Actions Container */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.avatarLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar {
+  color: var(--white-color);
+}
+
+/* Auth Section Styling */
+.auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  & > .btn_dangnhap {
+    background-color: #283539;
+    & > span {
+      color: var(--white-color);
+    }
+  }
+}
+
+/* Button Styling */
+.auth button {
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Register Button – primary blue */
+.auth button:first-child {
+  background-color: #0ea5e9; /* sky-500 */
+  color: var(--white-color);
+  border: none;
+}
+
+.auth button:first-child:hover {
+  background-color: #0284c7; /* sky-600 */
+}
+
+/* Login Button – ghost/dark */
+.auth button:last-child {
+  background-color: #283539; /* slate-900 gần màu header */
+  color: var(--white-color);
+  border: 1px solid #4b5563; /* slate-600 */
+}
+
+.auth button:last-child:hover {
+  background-color: #0b1220;
+  border-color: #64748b; /* slate-500 */
+}
+
+/* =======================
+   User Menu / Dropdown
+======================= */
+.userMenu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.avatarButton {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+}
+
+.avatarButton:focus-visible {
+  outline: 3px solid rgba(0, 0, 0, 0.12);
+  outline-offset: 2px;
+}
+
+.avatarImg {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f3f3f3;
+}
+
+.avatar {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  padding: 8px;
+}
+
+.dropdownHeader {
+  padding: 10px 10px 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 6px;
+}
+
+.dropdownName {
+  font-weight: 700;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.dropdownItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 10px;
+  border-radius: 10px;
+
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.82);
+  font-weight: 600;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.dropdownItem:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.danger {
+  color: #d13a3a;
+}
+
+.danger:hover {
+  background: rgba(209, 58, 58, 0.08);
+}
+
+/* =======================
+   Responsive
+======================= */
+@media (max-width: 900px) {
+  .nav {
+    display: none;
+  }
+  .logoText {
+    font-size: 16px;
+  }
+}

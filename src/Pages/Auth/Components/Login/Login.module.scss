@@ -1,0 +1,200 @@
+/* Login.module.scss */
+
+.form {
+  width: 100%;
+  max-width: 420px;
+  padding: 0 2.5rem;
+  border-radius: 12px;
+  background: transparent;
+}
+
+/* Field wrapper */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.1rem;
+
+  label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.92);
+    letter-spacing: 0.2px;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.95rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.25); /* slate border */
+    background: rgba(15, 23, 42, 0.65); /* slate-900 glass */
+    color: rgba(255, 255, 255, 0.92);
+    outline: none;
+
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
+
+    &::placeholder {
+      color: rgba(148, 163, 184, 0.85);
+    }
+
+    &:hover {
+      border-color: rgba(56, 189, 248, 0.35); /* sky */
+    }
+
+    &:focus {
+      border-color: rgba(56, 189, 248, 0.65);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+      background: rgba(15, 23, 42, 0.82);
+    }
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  }
+
+  .error {
+    margin-top: 0.45rem;
+    font-size: 0.88rem;
+    color: #fb7185; /* rose-400 */
+    line-height: 1.2;
+  }
+}
+
+/* Password input group */
+.password-group {
+  .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input {
+      padding-right: 3rem; /* chừa chỗ icon */
+    }
+
+    .btn-eye {
+      position: absolute;
+      right: 1px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: grid;
+      place-items: center;
+
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+
+      border: 1px solid transparent;
+      background: rgba(2, 6, 23, 0.25); /* slate-950 */
+      color: rgba(203, 213, 225, 0.9); /* slate-200 */
+      cursor: pointer;
+
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.05s ease;
+
+      &:hover:not(:disabled) {
+        background: rgba(56, 189, 248, 0.12);
+        border-color: rgba(56, 189, 248, 0.25);
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(-50%) scale(0.98);
+      }
+
+      &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+/* Submit button */
+.submit {
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+
+  background: linear-gradient(135deg, #0ea5e9, #22c55e); /* sky -> green */
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease,
+    opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.03);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(14, 165, 233, 0.22);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.18);
+  }
+
+  &:disabled {
+    background: rgba(148, 163, 184, 0.18);
+    border-color: rgba(148, 163, 184, 0.18);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: not-allowed;
+    opacity: 0.8;
+    box-shadow: none;
+  }
+}
+
+.buttonText {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+/* Loading row inside button */
+.loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+  font-size: 1.2rem;
+}
+
+/* Motion */
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Optional: giảm motion cho user bật reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+
+  .submit {
+    transition: none;
+  }
+
+  .form-group input {
+    transition: none;
+  }
+}

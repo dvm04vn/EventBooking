@@ -1,0 +1,464 @@
+.wrapper {
+  min-height: 100vh;
+}
+
+.header {
+  // position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 56px;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+/* ✅ Back button fixed góc trái */
+.backBtn {
+  position: fixed;
+  top: 12px; /* chỉnh theo ý */
+  left: 12px;
+  z-index: 60; /* cao hơn header */
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px;
+  border-radius: 10px;
+
+  // border: 1px solid rgba(148, 163, 184, 0.14);
+  // background: rgba(148, 163, 184, 0.08);
+  color: #cbd5e1;
+  cursor: pointer;
+
+  transition:
+    background 0.12s ease,
+    transform 0.12s ease;
+  &:hover {
+    background: rgba(148, 163, 184, 0.16);
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+  &:focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 2px;
+  }
+}
+
+.backText {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Title vẫn nằm giữa màn hình */
+.headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+
+  font-size: 13px;
+  font-weight: 700;
+  max-width: 60vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  justify-self: end;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    transform 0.12s ease;
+
+  &:hover {
+    background: rgba(148, 163, 184, 0.16);
+    color: #f8fafc;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 560px) {
+  .header {
+    height: 52px;
+    padding: 0 12px;
+  }
+  .headerTitle {
+    max-width: 66vw;
+  }
+}
+
+/* Layout container */
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 16px 32px; /* ✅ CTA không fixed → không cần chừa 120px */
+}
+
+/* ===== Cover ===== */
+.cover {
+  position: relative;
+  margin: 8px 0 16px;
+}
+
+.coverImg {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 32px rgba(2, 6, 23, 0.35);
+}
+
+/* Trong JSX coverTitle là <div aria-hidden> */
+.coverTitle {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: #f8fafc;
+
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+}
+
+/* ===== Info rows ===== */
+.infoList {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+
+.infoItem {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 56px;
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  background: #0e1a21; /* ✅ thêm background đúng style tổng thể */
+  transition:
+    background 0.15s ease,
+    transform 0.12s ease;
+
+  &:hover {
+    background: #0f222b;
+  }
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+
+  background: rgba(148, 163, 184, 0.08);
+  color: #cbd5e1;
+}
+
+.infoMain {
+  font-weight: 600;
+  color: #e8eef7;
+}
+
+.infoSub {
+  font-size: 13px;
+  color: rgba(226, 232, 240, 0.7);
+  margin-top: 2px;
+}
+
+.chev {
+  color: rgba(226, 232, 240, 0.5);
+}
+
+/* avatar stack */
+.avatarStack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #22303a;
+  margin-right: -6px;
+
+  /* đảm bảo ảnh cover trong component Image */
+  overflow: hidden;
+}
+
+/* ===== Tabs (full width + underline slider) ===== */
+/* JSX có style:
+   style={{ "--tab-count": TABS.length, "--active-index": activeIndex }}
+*/
+.tabs {
+  --tab-count: 5;
+  --active-index: 0;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--tab-count), 1fr);
+
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  overflow: hidden;
+
+  margin: 12px 0 8px;
+
+  /* underline chạy theo active index */
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: calc(100% / var(--tab-count));
+    height: 2px;
+    background: #22d3ee;
+    transform: translateX(calc(var(--active-index) * 100%));
+    transition: transform 220ms ease;
+  }
+}
+
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+
+  height: 40px;
+  width: 100%;
+  padding: 0 8px;
+
+  cursor: pointer;
+  text-align: center;
+
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease;
+
+  &:hover {
+    color: #e6edf6;
+    background: rgba(148, 163, 184, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+/* cx("tab", selected && "tabActive") => class "tabActive" */
+.tabActive {
+  color: #e6edf6;
+}
+
+/* ===== Panels / Sections ===== */
+.panel {
+  margin-top: 12px;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e6edf6;
+  margin: 14px 0 8px;
+}
+
+/* Card content (soft) */
+.cardSoft {
+  background: #0e1a21; /* ✅ đồng bộ speakerItem/mapWrap */
+  border-radius: 12px;
+  padding: 14px; /* ✅ trước bạn thiếu padding nên nhìn “trống” */
+}
+
+.paragraphs p + p {
+  margin-top: 10px;
+}
+
+/* Speakers */
+.speakerList {
+  display: grid;
+  gap: 10px;
+}
+
+.speakerItem {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 12px;
+  background: #0e1a21;
+  border-radius: 12px;
+}
+
+.speakerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.speakerMeta {
+  min-width: 0; /* tránh tràn chữ */
+}
+
+.speakerName {
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.speakerRole {
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 13px;
+  margin-top: 2px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Map */
+.mapWrap {
+  border-radius: 14px;
+  background: #0e1a21;
+}
+
+.mapImg {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Schedule */
+.schedule {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scheduleItem {
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  gap: 12px;
+
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.22);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.scheduleTime {
+  font-weight: 700;
+  color: #e6edf6;
+}
+
+.scheduleTitle {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+/* ===== CTA bottom (KHÔNG fixed) ===== */
+.ctaBar {
+  width: min(920px, calc(100% - 32px));
+  margin: 24px auto 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.priceLabel {
+  background: #0e1a21;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+}
+
+.priceCaption {
+  display: block;
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.68);
+}
+
+.priceValue {
+  font-weight: 800;
+  color: #0ea5e9;
+}
+
+.bookBtn {
+  min-width: 96px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+
+  background: #8b5cf6;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+
+  &:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 560px) {
+  .priceLabel {
+    display: none;
+  }
+  .ctaBar {
+    justify-content: flex-end;
+  }
+}
