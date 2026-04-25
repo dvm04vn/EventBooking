@@ -1,7 +1,7 @@
-import React, { forwardRef } from "react";
-import { Link } from "react-router-dom";
-import classNames from "classnames/bind";
-import styles from "./Button.module.scss";
+import classNames from 'classnames/bind';
+import styles from './Button.module.scss';
+import { Link } from 'react-router-dom';
+import { forwardRef } from 'react';
 
 const cx = classNames.bind(styles);
 
@@ -12,93 +12,56 @@ const Button = forwardRef(
       href,
       primary = false,
       outline = false,
-      text = false,
-      rounded = false,
+      outlineText = false,
       disabled = false,
+      text = false,
       small = false,
       large = false,
-      leftIcon = null,
-      rightIcon = null,
+      leftIcon = false,
+      rightIcon = false,
       children,
       className,
-      type = "button",
       onClick,
-      ...passProps
+      rounded,
+      ...passPops
     },
-    ref
+    ref,
   ) => {
-    let Component = "button";
+    let Components = 'button';
 
-    /** @type {Record<string, unknown>} */
-    const props = {
-      ...passProps,
+    let props = {
       onClick,
+      ...passPops,
     };
 
-    // Quyết định loại component: Link / a / button
     if (to) {
-      Component = Link;
       props.to = to;
+      Components = Link;
     } else if (href) {
-      Component = "a";
       props.href = href;
+      Components = 'a';
     }
 
-    // Xử lý disabled cho a/Link và button
-    if (disabled) {
-      props["aria-disabled"] = true;
-
-      // Với button: dùng thuộc tính disabled chuẩn
-      if (Component === "button") {
-        props.disabled = true;
-      } else {
-        // Với Link / a: chặn click + tab
-        props.onClick = (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        };
-        props.tabIndex = -1;
-      }
-    }
-
-    // Nếu là <button> mà không set type → mặc định "button" để tránh submit form ngoài ý muốn
-    if (Component === "button") {
-      props.type = type;
-    }
-
-    const classes = cx(
-      "wrapper",
-      {
-        [className]: className,
-        primary,
-        outline,
-        text,
-        rounded,
-        small,
-        large,
-        disabled,
-      }
-    );
+    const classes = cx('wrapper', {
+      [className]: className,
+      primary,
+      outline,
+      outlineText,
+      text,
+      small,
+      large,
+      disabled,
+      rounded,
+    });
 
     return (
-      <Component ref={ref} className={classes} {...props}>
-        {leftIcon && (
-          <span className={cx("icon", "leftIcon")}>
-            {leftIcon}
-          </span>
-        )}
-
-        <span className={cx("title")}>{children}</span>
-
-        {rightIcon && (
-          <span className={cx("icon", "rightIcon")}>
-            {rightIcon}
-          </span>
-        )}
-      </Component>
+      <Components ref={ref} className={classes} {...props}>
+        {leftIcon && <span className={cx('icon')}>{leftIcon}</span>}
+        <span className={cx('title')}>{children}</span>
+        {rightIcon && <span className={cx('icon')}>{rightIcon}</span>}
+      </Components>
     );
-  }
+  },
 );
-
 
 export default Button;

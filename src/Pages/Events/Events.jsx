@@ -1,15 +1,15 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import classNames from "classnames/bind";
-
 import styles from "./Events.module.scss";
-import { images } from "~/assets";
-
-import Button from "~/Components/Button";
-import SearchBar from "~/Components/SearchBar";
-import EventCardList from "~/Components/EventCardList/EventCardList";
+import { useEffect, useMemo, useState } from "react";
+import { getAllEvents } from "~/Services/events.service";
+import EventListCard from "~/Components/EventListCard";
+import images from "~/assets";
+import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
+
+const INITIAL_VISIBLE_COUNT = 8;
+const LOAD_MORE_COUNT = 4;
 
 const ALL_EVENTS = [
   {
@@ -102,147 +102,87 @@ const ALL_EVENTS = [
   },
 ];
 
-const PAGE_SIZE = 8;
-const normalize = (v) => (v || "").toLowerCase().trim();
-
 function Events() {
   const navigate = useNavigate();
 
-  const [query, setQuery] = useState("");
-  const [sortBy, setSortBy] = useState("popular");
-  const [visible, setVisible] = useState(PAGE_SIZE);
+  const [events, setEvents] = useState(ALL_EVENTS);
+  const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
-  // Filter + Sort
-  const filteredSorted = useMemo(() => {
-    const q = normalize(query);
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
 
-    let list = ALL_EVENTS;
-    if (q) {
-      list = list.filter((e) => {
-        const inTitle = normalize(e.title).includes(q);
-        const inVenue = normalize(e.venue).includes(q);
-        return inTitle || inVenue;
-      });
-    }
+      try {
+        const result = await getAllEvents();
+        const eventList = Array.isArray(result?.data) ? result.data : [];
 
-    const clone = [...list];
-    switch (sortBy) {
-      case "newest":
-        clone.sort((a, b) => new Date(b.date) - new Date(a.date));
-        break;
-      case "priceAsc":
-        clone.sort((a, b) => a.minPrice - b.minPrice);
-        break;
-      case "priceDesc":
-        clone.sort((a, b) => b.minPrice - a.minPrice);
-        break;
-      default: // popular
-        clone.sort((a, b) => b.popularity - a.popularity);
-        break;
-    }
+        setEvents(eventList.length > 0 ? eventList : ALL_EVENTS);
+      } catch (error) {
+        console.error("Lỗi khi tải sự kiện:", error);
+        setEvents(ALL_EVENTS);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return clone;
-  }, [query, sortBy]);
-
-  // Paging
-  const visibleEvents = useMemo(
-    () => filteredSorted.slice(0, visible),
-    [filteredSorted, visible]
-  );
-
-  const canLoadMore = visible < filteredSorted.length;
-
-  // Handlers
-  const handleSearch = useCallback((raw) => {
-    setQuery((raw || "").trim());
-    setVisible(PAGE_SIZE);
+    fetchEvents();
   }, []);
 
-  const handleChange = useCallback((val) => {
-    setQuery(val);
-    setVisible(PAGE_SIZE);
-  }, []);
+  const visibleEvents = useMemo(() => {
+    return events.slice(0, visibleCount);
+  }, [events, visibleCount]);
 
-  const handleSortChange = useCallback((e) => {
-    setSortBy(e.target.value);
-    setVisible(PAGE_SIZE);
-  }, []);
+  const hasMoreEvents = visibleCount < events.length;
 
-  const goDetail = useCallback(
-    (id) => navigate(`/events/${encodeURIComponent(id)}`),
-    [navigate]
-  );
+  const handleViewDetail = (event) => {
+    if (!event?.id) return;
+    navigate(`/events/${event.id}`);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount((prevCount) => prevCount + LOAD_MORE_COUNT);
+  };
 
   return (
     <div className={cx("wrapper")}>
       <div className={cx("container")}>
-        {/* Header */}
-        <section className={cx("header_events")}>
-          <h1 className={cx("title")}>Khám Phá Sự Kiện</h1>
-          <p className={cx("subtitle")}>
-            Tìm kiếm và đặt vé cho hàng ngàn sự kiện hấp dẫn trên toàn quốc.
+        <div className={cx("header")}>
+          <h1 className={cx("title")}>Khám phá sự kiện</h1>
+          <p className={cx("description")}>
+            Tìm kiếm và đặt vé cho hàng ngàn sự kiện hấp dẫn trên toàn quốc
           </p>
+        </div>
 
-          <div className={cx("toolbar")}>
-            <SearchBar
-              value={query}
-              onChange={handleChange}
-              onSearch={handleSearch}
-              placeholder="Tìm kiếm tên sự kiện, nghệ sĩ, địa điểm..."
-              showClearButton
-              aria-label="Tìm kiếm sự kiện"
-            />
-
-            <div className={cx("sortBox")}>
-              <label htmlFor="sort" className={cx("sortLabel")}>
-                Sắp xếp
-              </label>
-              <select
-                id="sort"
-                value={sortBy}
-                onChange={handleSortChange}
-                className={cx("sortSelect")}
-                aria-label="Sắp xếp kết quả"
-              >
-                <option value="popular">Phổ biến</option>
-                <option value="newest">Mới nhất</option>
-                <option value="priceAsc">Giá: Thấp → Cao</option>
-                <option value="priceDesc">Giá: Cao → Thấp</option>
-              </select>
-            </div>
-          </div>
-        </section>
-
-        {/* Events Grid */}
-        {visibleEvents.length > 0 ? (
-          <div className={cx("grid")}>
-            {visibleEvents.map((event, index) => (
-              <EventCardList
-                key={event.id}
-                event={event}
-                index={index}
-                onBook={goDetail}   // click nút đặt vé
-                onClick={goDetail}  // nếu card clickable
-              />
-            ))}
+        {loading ? (
+          <div className={cx("status")}>
+            <p>Đang tải sự kiện...</p>
           </div>
         ) : (
-          <div className={cx("emptyState")}>
-            Không tìm thấy sự kiện phù hợp.
-          </div>
-        )}
+          <>
+            <div className={cx("event-list")}>
+              {visibleEvents.map((event, index) => (
+                <EventListCard
+                  key={event.id || index}
+                  event={event}
+                  onCardClick={() => handleViewDetail(event)}
+                />
+              ))}
+            </div>
 
-        {/* Load more */}
-        <div className={cx("loadMore")}>
-          <Button
-            className={cx("btn_loadMore")}
-            onClick={() => setVisible((v) => v + PAGE_SIZE)}
-            disabled={!canLoadMore}
-            aria-disabled={!canLoadMore}
-          >
-            {canLoadMore ? "Tải thêm sự kiện" : "Đã hiển thị tất cả"}
-          </Button>
-        </div>
+            {hasMoreEvents && (
+              <div className={cx("footer")}>
+                <button
+                  type="button"
+                  className={cx("load-more-btn")}
+                  onClick={handleLoadMore}
+                >
+                  Xem thêm sự kiện
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,338 +1,302 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import classNames from "classnames/bind";
+import styles from "./EventDetail.module.scss";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-    FiBookmark,
-    FiShare2,
-    FiCalendar,
-    FiMapPin,
-    FiChevronRight,
+  FiArrowLeft,
+  FiBookmark,
+  FiShare2,
+  FiCalendar,
+  FiMapPin,
+  FiChevronRight,
 } from "react-icons/fi";
-import { FaArrowLeft } from "react-icons/fa";
-import classNames from "classnames/bind";
 
-import styles from "./EventDetail.module.scss";
-import { images } from "~/assets";
-
-import Button from "~/Components/Button";
-import Card from "~/Components/Card";
 import Image from "~/Components/Image";
-
+import images from "~/assets";
+import { getEventById } from "~/Services/events.service";
 
 const cx = classNames.bind(styles);
 
-const MOCK_EVENTS = [
+const EVENT_DETAIL_MOCK = {
+  id: 1,
+  pageTitle: "Vibrant Beats Music Festival",
+  title: "Vibrant Beats Music Festival 2024",
+  banner: images.eventDetail,
+  dateText: "October 26, 2024 - 7:00 PM",
+  dateSubText: "Thứ Bảy, bắt đầu lúc 19:00",
+  locationText: "Grand City Convention Center",
+  locationSubText: "123 Convention Way, City, State",
+  attendeesText: "Hơn 2,345 người đã tham gia",
+  description: [
+    "Hãy sẵn sàng cho một đêm âm nhạc bùng nổ tại Vibrant Beats Music Festival 2024! Đây là sự kiện không thể bỏ lỡ dành cho những người yêu âm nhạc, quy tụ những nghệ sĩ hàng đầu trong nước và quốc tế.",
+    "Tận hưởng không gian âm nhạc đa dạng từ EDM, Pop, Rock cho đến Hiphop, cùng với hệ thống âm thanh và ánh sáng đẳng cấp thế giới. Sự kiện cũng có các khu vực ẩm thực và hoạt động giải trí bên lề hấp dẫn.",
+  ],
+  speakers: [
     {
-        id: 1,
-        title: "Vibrant Beats Music Festival 2024",
-        cover: images.event,
-        dateLabel: "October 26, 2024 – 7:00 PM",
-        dateSub: "Thứ Bảy, bắt đầu lúc 19:00",
-        venue: "Grand City Convention Center",
-        address: "123 Convention Way, City, State",
-        attendeesText: "Hơn 2,345 người đã tham gia",
-        priceText: "500.000 VND",
-        description: [
-            "Hãy sẵn sàng cho một đêm âm nhạc bùng nổ tại Vibrant Beats Music Festival 2024! Đây là sự kiện không thể bỏ lỡ dành cho những người yêu âm nhạc, quy tụ những nghệ sĩ hàng đầu trong nước và quốc tế.",
-            "Tận hưởng không gian âm nhạc đa dạng: EDM, Pop, Rock cho đến Hiphop, cùng với hệ thống âm thanh và ánh sáng đẳng cấp thế giới. Sự kiện còn có các khu vực ẩm thực và hoạt động giải trí bên lề hấp dẫn.",
-        ],
-        schedule: [
-            { time: "18:00", title: "Mở cổng & Check-in" },
-            { time: "19:00", title: "Khai mạc" },
-            { time: "19:30", title: "Main Stage – DJ Elena" },
-            { time: "21:00", title: "Live Band – The Wanderers" },
-            { time: "23:00", title: "Bế mạc" },
-        ],
-        speakers: [
-            { id: "sp1", name: "DJ Elena", role: "Headliner DJ", avatar: images.event },
-            { id: "sp2", name: "The Wanderers", role: "Indie Rock Band", avatar: images.event },
-        ],
-        mapImg: images.event,
+      id: 1,
+      name: "DJ Elena",
+      role: "Headliner DJ",
+      avatar: images.avatar || images.event,
     },
-];
-
-const TABS = [
-    { key: "overview", label: "Tổng quan" },
-    { key: "schedule", label: "Lịch trình" },
-    { key: "speakers", label: "Diễn giả" },
-    { key: "venue", label: "Địa điểm" },
-    { key: "tickets", label: "Vé" },
-];
+    {
+      id: 2,
+      name: "The Wanderers",
+      role: "Indie Rock Band",
+      avatar: images.avatar || images.event,
+    },
+  ],
+  priceText: "500.000 VND",
+  minPrice: 500000,
+  mapImage: images.map || images.event,
+};
 
 function EventDetail() {
-    const { id } = useParams();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-    const event = useMemo(() => {
-        const found = MOCK_EVENTS.find((e) => String(e.id) === String(id));
-        return found ?? MOCK_EVENTS[0] ?? null;
-    }, [id]);
+  const [eventDetail, setEventDetail] = useState(EVENT_DETAIL_MOCK);
+  const [loading, setLoading] = useState(true);
 
-    const eventId = event?.id;
+  useEffect(() => {
+    let isMounted = true;
 
-    const [activeTab, setActiveTab] = useState("overview");
+    const fetchEventDetail = async () => {
+      setLoading(true);
 
-    // Khi đổi id -> reset tab để tránh “kẹt tab”
-    useEffect(() => {
-        setActiveTab("overview");
-    }, [id, setActiveTab]);
+      try {
+        const res = await getEventById(id);
 
+        if (!isMounted) return;
 
-    useEffect(() => {
-        if (!event?.title) return;
-        document.title = `${event.title} — Event`;
-    }, [event?.title]);
+        setEventDetail(res?.data || EVENT_DETAIL_MOCK);
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết sự kiện:", error);
 
-    // index tab active cho underline slider
-    const activeIndex = useMemo(() => {
-        const idx = TABS.findIndex((t) => t.key === activeTab);
-        return idx >= 0 ? idx : 0;
-    }, [activeTab]);
+        if (!isMounted) return;
 
-    const buyTicket = useCallback(() => {
-        if (!eventId) return;
-        navigate(`/checkout/${eventId}`);
-    }, [navigate, eventId]);
+        setEventDetail(EVENT_DETAIL_MOCK);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-    const onTabsKeyDown = useCallback(
-        (e) => {
-            const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
-            if (!keys.includes(e.key)) return;
-
-            e.preventDefault();
-
-            const cur = TABS.findIndex((t) => t.key === activeTab);
-            const curIdx = cur >= 0 ? cur : 0;
-
-            let nextIdx = curIdx;
-            if (e.key === "ArrowLeft") nextIdx = (curIdx - 1 + TABS.length) % TABS.length;
-            if (e.key === "ArrowRight") nextIdx = (curIdx + 1) % TABS.length;
-            if (e.key === "Home") nextIdx = 0;
-            if (e.key === "End") nextIdx = TABS.length - 1;
-
-            const nextKey = TABS[nextIdx]?.key;
-            if (!nextKey) return;
-
-            setActiveTab(nextKey);
-
-            requestAnimationFrame(() => {
-                document.getElementById(`tab-${nextKey}`)?.focus();
-            });
-        },
-        [activeTab]
-    );
-
-    if (!event) {
-        return (
-            <div className={cx("wrapper")}>
-                <div className={cx("container")}>
-                    <p>Sự kiện không tồn tại.</p>
-                </div>
-            </div>
-        );
+    if (!id) {
+      setEventDetail(EVENT_DETAIL_MOCK);
+      setLoading(false);
+      return;
     }
 
-    const renderSpeakers = () => (
-        <div className={cx("speakerList")}>
-            {(event.speakers || []).map((sp) => (
-                <Card key={sp.id} className={cx("speakerItem")} variant="default">
-                    <Image
-                        src={sp.avatar}
-                        alt=""
-                        ratio={1}
-                        fit="cover"
-                        className={cx("speakerAvatar")}
-                        decoding="async"
-                        lazy
-                    />
-                    <div className={cx("speakerMeta")}>
-                        <div className={cx("speakerName")}>{sp.name}</div>
-                        <div className={cx("speakerRole")}>{sp.role}</div>
-                    </div>
-                </Card>
-            ))}
-        </div>
-    );
+    fetchEventDetail();
 
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  const tabs = useMemo(() => {
+    return ["Tổng quan", "Lịch trình", "Diễn giả", "Địa điểm", "Vé"];
+  }, []);
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const handleBookTicket = () => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      navigate("/login", {
+        state: {
+          redirectTo: `/events/${eventDetail.id}/booking`,
+        },
+      });
+      return;
+    }
+
+    navigate(`/events/${eventDetail.id}/booking`);
+  };
+
+  if (loading) {
     return (
-        <div className={cx("wrapper")}>
-            <div className={cx("header")}>
-                <button type="button" onClick={() => navigate(-1)} className={cx("backBtn")} aria-label="Quay lại">
-                    <FaArrowLeft size={18} />
-                    <span className={cx("backText")}>Quay lại</span>
-                </button>
-                <h1 className={cx("headerTitle")} title={event.title}>
-                    {event.title}
-                </h1>
-                <div className={cx("actions")}>
-                    <button type="button" className={cx("iconBtn")} aria-label="Lưu sự kiện">
-                        <FiBookmark aria-hidden size={18} />
-                    </button>
-                    <button type="button" className={cx("iconBtn")} aria-label="Chia sẻ">
-                        <FiShare2 aria-hidden size={18} />
-                    </button>
-                </div>
-            </div>
-
-            <div className={cx("container")}>
-                <div className={cx("cover")}>
-                    <Image
-                        src={event.cover}
-                        alt={`Ảnh bìa sự kiện: ${event.title}`}
-                        ratio={16 / 6}
-                        fit="cover"
-                        className={cx("coverImg")}
-                        decoding="async"
-                        lazy
-                    />
-                    <div className={cx("coverTitle")} aria-hidden="true">
-                        {event.title}
-                    </div>
-                </div>
-
-                <div className={cx("infoList")}>
-                    <div className={cx("infoItem")}>
-                        <span className={cx("icon")} aria-hidden>
-                            <FiCalendar size={18} />
-                        </span>
-                        <div>
-                            <div className={cx("infoMain")}>{event.dateLabel}</div>
-                            <div className={cx("infoSub")}>{event.dateSub}</div>
-                        </div>
-                        <FiChevronRight className={cx("chev")} aria-hidden size={16} />
-                    </div>
-
-                    <div className={cx("infoItem")}>
-                        <span className={cx("icon")} aria-hidden>
-                            <FiMapPin size={18} />
-                        </span>
-                        <div>
-                            <div className={cx("infoMain")}>{event.venue}</div>
-                            <div className={cx("infoSub")}>{event.address}</div>
-                        </div>
-                        <FiChevronRight className={cx("chev")} aria-hidden size={16} />
-                    </div>
-
-                    <div className={cx("infoItem")} aria-live="polite">
-                        <span className={cx("avatarStack")} aria-hidden>
-                            <Image src={images.event} alt="" ratio={1} fit="cover" className={cx("avatar")} />
-                            <Image src={images.event} alt="" ratio={1} fit="cover" className={cx("avatar")} />
-                            <Image src={images.event} alt="" ratio={1} fit="cover" className={cx("avatar")} />
-                        </span>
-                        <div className={cx("infoSub")}>{event.attendeesText}</div>
-                    </div>
-                </div>
-
-                <div
-                    className={cx("tabs")}
-                    role="tablist"
-                    aria-label="Thông tin sự kiện"
-                    aria-orientation="horizontal"
-                    style={{ "--tab-count": TABS.length, "--active-index": activeIndex }}
-                    onKeyDown={onTabsKeyDown}
-                >
-                    {TABS.map((t) => {
-                        const selected = activeTab === t.key;
-                        return (
-                            <button
-                                key={t.key}
-                                id={`tab-${t.key}`}
-                                type="button"
-                                className={cx("tab", selected && "tabActive")}
-                                role="tab"
-                                aria-selected={selected}
-                                aria-controls={`panel-${t.key}`}
-                                tabIndex={selected ? 0 : -1}
-                                onClick={() => setActiveTab(t.key)}
-                            >
-                                {t.label}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                <div
-                    className={cx("panel")}
-                    role="tabpanel"
-                    id={`panel-${activeTab}`}
-                    aria-labelledby={`tab-${activeTab}`}
-                >
-                    {activeTab === "overview" && (
-                        <>
-                            <h2 className={cx("sectionTitle")}>Về sự kiện này</h2>
-                            <Card className={cx("cardSoft")}>
-                                <div className={cx("paragraphs")}>
-                                    {(event.description || []).map((p, i) => (
-                                        <p key={i}>{p}</p>
-                                    ))}
-                                </div>
-                            </Card>
-
-                            <h3 className={cx("sectionTitle")}>Diễn giả & Nghệ sĩ</h3>
-                            {renderSpeakers()}
-
-                            <h3 className={cx("sectionTitle")}>Địa điểm</h3>
-                            <Card className={cx("mapWrap")} variant="default">
-                                <Image
-                                    src={event.mapImg}
-                                    alt="Bản đồ địa điểm"
-                                    ratio={16 / 7}
-                                    fit="cover"
-                                    className={cx("mapImg")}
-                                    decoding="async"
-                                    lazy
-                                />
-                            </Card>
-                        </>
-                    )}
-
-                    {activeTab === "schedule" && (
-                        <Card className={cx("cardSoft")}>
-                            <ul className={cx("schedule")}>
-                                {(event.schedule || []).map((s) => (
-                                    <li key={s.time} className={cx("scheduleItem")}>
-                                        <span className={cx("scheduleTime")}>{s.time}</span>
-                                        <span className={cx("scheduleTitle")}>{s.title}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </Card>
-                    )}
-
-                    {activeTab === "speakers" && renderSpeakers()}
-
-                    {activeTab === "venue" && (
-                        <Card className={cx("mapWrap")} variant="default">
-                            <Image
-                                src={event.mapImg}
-                                alt="Bản đồ địa điểm"
-                                ratio={16 / 7}
-                                fit="cover"
-                                className={cx("mapImg")}
-                                decoding="async"
-                                lazy
-                            />
-                        </Card>
-                    )}
-
-                    {activeTab === "tickets" && (
-                        <Card className={cx("cardSoft")}>
-                            <p>Vé tiêu chuẩn, khu vực đứng tự do. Vui lòng tiếp tục để chọn hạng vé.</p>
-                        </Card>
-                    )}
-                </div>
-
-                <div className={cx("ctaBar")}>
-                    <div className={cx("priceLabel")}>
-                        <span className={cx("priceCaption")}>Giá vé từ</span>
-                        <span className={cx("priceValue")}>{event.priceText}</span>
-                    </div>
-                    <Button className={cx("bookBtn")} onClick={buyTicket} aria-label="Đặt vé">
-                        Đặt vé
-                    </Button>
-                </div>
-            </div>
+      <div className={cx("wrapper")}>
+        <div className={cx("container")}>
+          <div className={cx("status")}>
+            <p>Đang tải chi tiết sự kiện...</p>
+          </div>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className={cx("wrapper")}>
+      <div className={cx("container")}>
+        <header className={cx("topbar")}>
+          <button
+            type="button"
+            className={cx("back-button")}
+            onClick={handleGoBack}
+          >
+            <FiArrowLeft className={cx("back-icon")} />
+            <span>Quay lại</span>
+          </button>
+
+          <h1 className={cx("page-title")}>
+            {eventDetail.pageTitle || eventDetail.title}
+          </h1>
+
+          <div className={cx("top-actions")}>
+            <button type="button" className={cx("icon-button")}>
+              <FiBookmark />
+            </button>
+            <button type="button" className={cx("icon-button")}>
+              <FiShare2 />
+            </button>
+          </div>
+        </header>
+
+        <section className={cx("hero")}>
+          <div className={cx("hero-image")}>
+            <Image
+              src={eventDetail.banner || eventDetail.image || images.eventDetail}
+              alt={eventDetail.title}
+              imgClassName={cx("banner-image")}
+              ratio="16 / 6"
+              rounded="lg"
+            />
+            <div className={cx("hero-overlay")} />
+            <h2 className={cx("hero-title")}>{eventDetail.title}</h2>
+          </div>
+        </section>
+
+        <section className={cx("meta-list")}>
+          <div className={cx("meta-card")}>
+            <div className={cx("meta-icon")}>
+              <FiCalendar />
+            </div>
+            <div className={cx("meta-content")}>
+              <p className={cx("meta-title")}>{eventDetail.dateText}</p>
+              <p className={cx("meta-subtitle")}>{eventDetail.dateSubText}</p>
+            </div>
+            <span className={cx("meta-arrow")}>
+              <FiChevronRight />
+            </span>
+          </div>
+
+          <div className={cx("meta-card")}>
+            <div className={cx("meta-icon")}>
+              <FiMapPin />
+            </div>
+            <div className={cx("meta-content")}>
+              <p className={cx("meta-title")}>
+                {eventDetail.locationText || eventDetail.venue}
+              </p>
+              <p className={cx("meta-subtitle")}>
+                {eventDetail.locationSubText || eventDetail.address}
+              </p>
+            </div>
+            <span className={cx("meta-arrow")}>
+              <FiChevronRight />
+            </span>
+          </div>
+
+          <div className={cx("attendees")}>
+            <div className={cx("attendees-avatars")}>
+              <div className={cx("attendee-avatar")}>
+                <img src={images.avatar || images.event} alt="attendee 1" />
+              </div>
+              <div className={cx("attendee-avatar", "is-overlap")}>
+                <img src={images.avatar || images.event} alt="attendee 2" />
+              </div>
+            </div>
+
+            <p className={cx("attendees-text")}>
+              {eventDetail.attendeesText || "Hơn 2,345 người đã tham gia"}
+            </p>
+          </div>
+        </section>
+
+        <nav className={cx("tabs")}>
+          {tabs.map((tab, index) => (
+            <button
+              key={tab}
+              type="button"
+              className={cx("tab", { active: index === 0 })}
+            >
+              {tab}
+            </button>
+          ))}
+        </nav>
+
+        <section className={cx("section")}>
+          <h3 className={cx("section-title")}>Về sự kiện này</h3>
+
+          <div className={cx("description")}>
+            {(Array.isArray(eventDetail.description)
+              ? eventDetail.description
+              : [eventDetail.description || ""]).map((paragraph, index) => (
+                <p key={`${eventDetail.id}-${index}`} className={cx("paragraph")}>
+                  {paragraph}
+                </p>
+              ))}
+          </div>
+        </section>
+
+        <section className={cx("section")}>
+          <h3 className={cx("section-title")}>Diễn giả & Nghệ sĩ</h3>
+
+          <div className={cx("speaker-list")}>
+            {(eventDetail.speakers || []).map((speaker, index) => (
+              <div key={speaker.id || index} className={cx("speaker-card")}>
+                <div className={cx("speaker-avatar")}>
+                  <img
+                    src={speaker.avatar || images.avatar || images.event}
+                    alt={speaker.name}
+                  />
+                </div>
+
+                <div className={cx("speaker-content")}>
+                  <p className={cx("speaker-name")}>{speaker.name}</p>
+                  <p className={cx("speaker-role")}>{speaker.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className={cx("section")}>
+          <h3 className={cx("section-title")}>Địa điểm</h3>
+
+          <div className={cx("map-box")}>
+            <img
+              src={eventDetail.mapImage || images.map || images.event}
+              alt="Event location map"
+              className={cx("map-image")}
+            />
+          </div>
+        </section>
+
+        <footer className={cx("booking-bar")}>
+          <div className={cx("booking-price")}>
+            <p className={cx("booking-label")}>Giá vé từ</p>
+            <p className={cx("booking-value")}>
+              {eventDetail.priceText || "500.000 VND"}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={cx("booking-button")}
+            onClick={handleBookTicket}
+          >
+            Đặt vé
+          </button>
+        </footer>
+      </div>
+    </div>
+  );
 }
 
 export default EventDetail;

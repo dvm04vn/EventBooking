@@ -2,20 +2,27 @@
 import Home from "~/Pages/Home";
 import Events from "~/Pages/Events";
 import EventDetail from "~/Pages/EventDetail";
-import Checkout from "~/Pages/Checkout";
-import CheckoutInfo from "~/Pages/CheckoutInfo";
 import CheckoutSuccess from "~/Pages/CheckoutSuccess";
 import Auth from "~/Pages/Auth";
+import Profile from "~/Pages/Profile/Profile";
+import About from "~/Pages/About";
+import Booking from "~/Pages/Booking";
+import Payment from "~/Pages/Payment";
 // improt layout
 import DetailLayout from "~/Layout/DetailLayout";
 import DefaultLayout from "~/Layout/DefaultLayout";
-import Profile from "~/Pages/Profile/Profile";
+
 
 // PUBLIC ROUTES
 export const PublicRouter = [
   {
     path: "/",
     component: Home,
+    layout: DefaultLayout,
+  },
+  {
+    path: "/about",
+    component: About,
     layout: DefaultLayout,
   },
   {
@@ -29,13 +36,13 @@ export const PublicRouter = [
     layout: DetailLayout,
   },
   {
-    path: "/checkout/:eventId",
-    component: Checkout,
+    path: "/events/:id/booking",
+    component: Booking,
     layout: DetailLayout,
   },
   {
-    path: "/checkout/:eventId/info",
-    component: CheckoutInfo,
+    path: "/events/:id/payment",
+    component: Payment,
     layout: DetailLayout,
   },
   {
@@ -53,20 +60,16 @@ export const PublicRouter = [
     component: Auth,
     layout: DetailLayout,
   },
-  // {
-  //   path: "/profile",
-  //   component: Profile,
-  //   layout: DetailLayout,
-  // },
-];
-
-// USER ROUTES
-export const UserRouter = [
   {
     path: "/profile",
     component: Profile,
     layout: DetailLayout,
   },
+];
+
+// USER ROUTES
+export const UserRouter = [
+ 
 ];
 
 // ADMIN ROUTES

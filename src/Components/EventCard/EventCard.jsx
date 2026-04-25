@@ -1,82 +1,64 @@
-import React, { useMemo, useCallback } from "react";
 import classNames from "classnames/bind";
-import Button from "~/Components/Button";
 import styles from "./EventCard.module.scss";
+import Card from "../Card";
+import Image from "~/Components/Image";
+import Button from "~/Components/Button";
 
 const cx = classNames.bind(styles);
 
-const formatVND = (value) => {
-    if (typeof value !== "number") return "";
-    return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-        maximumFractionDigits: 0,
-    }).format(value);
-};
+function EventCard({ event, onCardClick }) {
+    const {
+        title = "",
+        location = "",
+        image = "",
+        date,
+        month,
+        dateTag = "",
+    } = event || {};
 
-const DateBadge = ({ label }) => {
-    if (!label) return null;
-    return <div className={cx("date-badge")}>{label}</div>;
-};
+    const handleBookClick = () => {
+        onCardClick?.(event);
+    };
 
-const EventCard = ({ event, index = 0, onBook }) => {
-    const delayStyle = useMemo(
-        () => ({ animationDelay: `${index * 0.1}s` }),
-        [index]
-    );
-
-    const handleBooking = useCallback(
-        (e) => {
-            e?.stopPropagation(); // nếu sau này bạn cho click cả card
-            onBook?.(event?.id);
-        },
-        [onBook, event?.id]
-    );
-
-    const priceText = useMemo(() => {
-        if (typeof event?.priceFrom !== "number") return "";
-        return `Từ ${formatVND(event.priceFrom)}`;
-    }, [event?.priceFrom]);
+    const dayText = dateTag || (date && month ? `${date} Thg ${month}` : "");
 
     return (
-        <article
-            className={cx("event-card")}
-            style={delayStyle}
-            aria-label={event?.title}
-        >
-            {/* Image Section */}
-            <div className={cx("image-wrapper")}>
-                <img
-                    src={event?.image}
-                    alt={event?.title || "Event image"}
-                    className={cx("image")}
-                    loading="lazy"
+        <Card className={cx("card")}>
+            <div className={cx("thumb")}>
+                <Image
+                    src={image}
+                    alt={title}
+                    className={cx("image-wrapper")}
+                    imgClassName={cx("image")}
+                    ratio="16 / 10"
+                    rounded="none"
                 />
 
-                {/* Badge ngày (lấy đúng field bạn đang có: event.date) */}
-                <DateBadge label={event?.date} />
-
-                <div className={cx("overlay")} aria-hidden="true" />
+                {dayText && <div className={cx("badge")}>{dayText}</div>}
             </div>
 
-            {/* Content Section */}
-            <div className={cx("content")}>
-                <h3 className={cx("title")}>{event?.title}</h3>
+            <Card.Content className={cx("body")}>
+                <Card.Title className={cx("title")}>{title}</Card.Title>
 
-                {/* Đồng bộ: bạn có location/venue/dateLabel */}
-                {event?.location && <p className={cx("subtitle")}>{event.location}</p>}
-                {event?.venue && <p className={cx("meta")}>{event.venue}</p>}
-                {event?.dateLabel && <p className={cx("meta")}>{event.dateLabel}</p>}
+                <Card.Description className={cx("location")}>
+                    {location}
+                </Card.Description>
+            </Card.Content>
 
-                {/* Giá từ */}
-                {priceText && <p className={cx("price")}>{priceText}</p>}
-
-                <Button variant="primary" fullWidth onClick={handleBooking}>
-                    Đặt vé
-                </Button>
-            </div>
-        </article>
+            <Card.Footer className={cx("footer")}>
+                <div className={cx('button')}>
+                    <Button
+                        primary
+                        type="button"
+                        className={cx("button")}
+                        onClick={handleBookClick}
+                    >
+                        Đặt vé
+                    </Button>
+                </div>
+            </Card.Footer>
+        </Card>
     );
-};
+}
 
 export default EventCard;

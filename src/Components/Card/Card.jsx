@@ -1,103 +1,130 @@
-import React, { forwardRef, useCallback } from "react";
-import classNames from "classnames/bind";
-import styles from "./Card.module.scss";
+import classNames from 'classnames/bind';
+import styles from './Card.module.scss';
 
 const cx = classNames.bind(styles);
 
-const Card = forwardRef(
-  (
-    {
-      as: Component = "div",
-      component,
-      children,
-      variant = "default",
-      clickable = false,
-      interactive,
-      disabled = false,
-      className,
-      onClick,
-      onKeyDown,
-      tabIndex,
-      href,
-      target,
-      rel,
-      ...rest
-    },
-    ref
-  ) => {
-    const As = component || Component;
+function Card({
+  children,
+  className,
+  hoverable = false,
+  bordered = false,
+  flat = false,
+  clickable = false,
+  padding = 'md',
+  rounded = 'lg',
+  shadow = 'sm',
+  onClick,
+  ...passProps
+}) {
+  return (
+    <div
+      className={cx(
+        'card',
+        `padding-${padding}`,
+        `rounded-${rounded}`,
+        `shadow-${shadow}`,
+        {
+          hoverable,
+          bordered,
+          flat,
+          clickable: clickable || !!onClick,
+        },
+        className,
+      )}
+      onClick={onClick}
+      {...passProps}
+    >
+      {children}
+    </div>
+  );
+}
 
-    const inferred = !!onClick || (!!href && As === "a");
-    const isInteractive = (interactive ?? inferred) && !disabled;
+Card.Header = function CardHeader({
+  children,
+  className,
+  hasBorder = false,
+  align = 'between',
+  ...passProps
+}) {
+  return (
+    <div
+      className={cx(
+        'header',
+        `header-align-${align}`,
+        { 'header-border': hasBorder },
+        className,
+      )}
+      {...passProps}
+    >
+      {children}
+    </div>
+  );
+};
 
-    const handleClick = useCallback(
-      (e) => {
-        if (disabled) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        onClick?.(e);
-      },
-      [disabled, onClick]
-    );
+Card.Title = function CardTitle({ children, className, ...passProps }) {
+  return (
+    <h3 className={cx('title', className)} {...passProps}>
+      {children}
+    </h3>
+  );
+};
 
-    const handleKeyDown = useCallback(
-      (e) => {
-        onKeyDown?.(e);
-        if (!isInteractive) return;
-        if (As === "a" || As === "button") return;
+Card.Description = function CardDescription({
+  children,
+  className,
+  ...passProps
+}) {
+  return (
+    <p className={cx('description', className)} {...passProps}>
+      {children}
+    </p>
+  );
+};
 
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleClick(e);
-        }
-      },
-      [As, isInteractive, handleClick, onKeyDown]
-    );
+Card.Action = function CardAction({ children, className, ...passProps }) {
+  return (
+    <div className={cx('action', className)} {...passProps}>
+      {children}
+    </div>
+  );
+};
 
-    const classes = cx(
-      "card",
-      `card--${variant}`,
-      {
-        "card--clickable": clickable,
-        "card--interactive": isInteractive,
-        "card--disabled": disabled,
-      },
-      className
-    );
+Card.Content = function CardContent({
+  children,
+  className,
+  flush = false,
+  ...passProps
+}) {
+  return (
+    <div
+      className={cx('content', { flush }, className)}
+      {...passProps}
+    >
+      {children}
+    </div>
+  );
+};
 
-    const anchorProps =
-      As === "a"
-        ? {
-          href: disabled ? undefined : href,
-          target,
-          rel: target === "_blank"
-            ? [rel, "noopener", "noreferrer"].filter(Boolean).join(" ")
-            : rel,
-        }
-        : {};
-
-    const a11yProps =
-      isInteractive && As !== "a" && As !== "button"
-        ? { role: "button", tabIndex: tabIndex ?? 0 }
-        : { tabIndex };
-
-    return (
-      <As
-        ref={ref}
-        className={classes}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        aria-disabled={disabled || undefined}
-        {...anchorProps}
-        {...a11yProps}
-        {...rest}
-      >
-        {children}
-      </As>
-    );
-  }
-);
+Card.Footer = function CardFooter({
+  children,
+  className,
+  hasBorder = false,
+  align = 'end',
+  ...passProps
+}) {
+  return (
+    <div
+      className={cx(
+        'footer',
+        `footer-align-${align}`,
+        { 'footer-border': hasBorder },
+        className,
+      )}
+      {...passProps}
+    >
+      {children}
+    </div>
+  );
+};
 
 export default Card;

@@ -1,140 +1,142 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 0;
+  gap: 6px;
 }
 
 .fullWidth {
   width: 100%;
 }
 
-/* Label */
-
-.label {
-  font-size: 1.3rem;
-  font-weight: 500;
-  color: var(--Catskill-White);
+.disabled {
+  opacity: 0.7;
 }
 
-/* =========================
- * Input container
- * ======================= */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #111827;
+}
 
-.inputContainer {
-  position: relative;
+.required {
+  color: #ef4444;
+}
+
+.fieldWrapper {
   display: flex;
   align-items: center;
-  background-color: rgba(15, 23, 42, 0.9); /* gần var(--Ebony) */
+  min-height: 44px;
+  border: 1px solid #d1d5db;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.5); /* slate-400-ish */
+  background-color: #fff;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     background-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  }
 }
 
-.inputContainer:hover {
-  border-color: rgba(148, 163, 184, 0.9);
-}
+.input {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: #111827;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  padding: 0 14px;
 
-.inputContainer.error {
-  border-color: #f97373; /* đỏ nhẹ */
-  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.3);
-}
+  &::placeholder {
+    color: #9ca3af;
+  }
 
-/* Icon positioning */
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:read-only {
+    cursor: default;
+  }
+}
 
 .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  color: #9ca3af; /* gray-400 */
+  min-width: 40px;
+  height: 100%;
+  color: #6b7280;
+  font-size: 1.6rem;
 }
 
 .leftIcon {
-  margin-left: 12px;
-  margin-right: 4px;
+  padding-left: 2px;
 }
 
 .rightIcon {
-  margin-right: 12px;
-  margin-left: 4px;
+  padding-right: 2px;
 }
 
-/* =========================
- * Input element
- * ======================= */
-
-.input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-
-  padding: 10px 14px;
-  font-size: 1.4rem;
-  line-height: 1.4;
-
-  color: #ffffff;
-  background-color: transparent;
-
-  box-sizing: border-box;
+.hasLeftIcon {
+  .input {
+    padding-left: 0;
+  }
 }
 
-/* Khi có icon trái/phải thì padding sẽ được offset bởi icon wrapper */
-.inputContainer.hasLeftIcon .input {
-  padding-left: 4px; /* đã có icon chiếm chỗ */
+.hasRightIcon {
+  .input {
+    padding-right: 0;
+  }
 }
 
-.inputContainer.hasRightIcon .input {
-  padding-right: 4px;
+.hasError {
+  border-color: #ef4444;
+
+  &:focus-within {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+  }
 }
 
-/* Focus states */
+.success {
+  border-color: #22c55e;
 
-.input:focus {
-  background-color: rgba(255, 255, 255, 0.02);
+  &:focus-within {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+  }
 }
 
-.input:focus-visible {
-  outline: none;
-}
-
-.inputContainer:has(.input:focus-visible) {
-  border-color: #0ea5e9;
-  box-shadow:
-    0 0 0 1px rgba(14, 165, 233, 0.4),
-    0 10px 25px rgba(15, 23, 42, 0.6);
-}
-
-/* Disabled */
-
-.input:disabled {
+.fieldWrapper.disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
   cursor: not-allowed;
-  color: #9ca3af;
 }
 
-.input:disabled::placeholder {
+.message {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+.hint {
   color: #6b7280;
 }
 
-.input:disabled + .rightIcon,
-.input:disabled ~ .icon {
-  color: #6b7280;
+.error {
+  color: #ef4444;
 }
 
-/* =========================
- * Helper & error text
- * ======================= */
-
-.helperText {
-  font-size: 1.25rem;
-  color: var(--text-secondary);
-}
-
-.errorText {
-  font-size: 1.25rem;
-  color: #f97373; /* đỏ nhưng không quá gắt */
+.message.success {
+  color: #16a34a;
 }

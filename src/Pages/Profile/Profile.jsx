@@ -1,149 +1,130 @@
-import classNames from "classnames/bind";
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-
-import styles from "./Profile.module.scss";
-import images from "~/assets";
-import Image from "~/components/Image";
-import { useAuth } from "~/context/AuthContext";
-import { getMyProfile } from "~/Services/ProfileService";
+import React, { useEffect, useState } from 'react';
+import classNames from 'classnames/bind';
+import styles from './Profile.module.scss';
+// import { getProfileid } from '~/Services/profile.service';
 
 const cx = classNames.bind(styles);
 
-function Profile() {
-    const { user } = useAuth(); 
-    
-    const { username } = useParams(); // nếu route bạn có :username thì giữ
+export const MOCK_USER = {
+    success: true,
+    message: 'Lấy thông tin profile thành công',
+    data: {
+        id: 'usr_1024',
+        username: 'nguyenvana',
+        fullName: 'Nguyễn Văn A',
+        email: 'nguyenvana@gmail.com',
+        phone: '0987654321',
+        avatar: 'https://i.pravatar.cc/300?img=12',
+        coverPhoto: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+        bio: 'Frontend Developer | ReactJS | NodeJS',
+        gender: 'male',
+        dateOfBirth: '1999-08-15',
+        address: {
+            street: '12 Nguyễn Trãi',
+            ward: 'Phường Bến Thành',
+            district: 'Quận 1',
+            city: 'Hồ Chí Minh',
+        },
+        socials: {
+            facebook: 'https://facebook.com/nguyenvana',
+            github: 'https://github.com/nguyenvana',
+            linkedin: 'https://linkedin.com/in/nguyenvana',
+        },
+        stats: {
+            followers: 1250,
+            following: 320,
+            posts: 48,
+        },
+        role: 'user',
+        isVerified: true,
+        createdAt: '2024-01-10T08:30:00.000Z',
+        updatedAt: '2026-04-13T10:15:00.000Z',
+    },
+};
 
-    const [profileData, setProfileData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+function Profile() {
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        let alive = true;
-
-        const fetchProfile = async () => {
-            setLoading(true);
-            setError("");
-
+        const fetchUser = async () => {
             try {
-                // ✅ nếu API là /auth/profile thì gọi getMyProfile() thôi
-                const res = await getMyProfile(); // <-- đổi nếu cần username
-                const data = res?.data ?? res;
+                // const res = await getProfileid();
+                const res = MOCK_USER;
 
-                if (!alive) return;
-
-                setProfileData({
-                    user: data?.user ?? user,
-                    profile: data?.profile ?? data?.user?.profile ?? user?.profile ?? null,
-                    courses: Array.isArray(data?.courses) ? data.courses : (user?.courses ?? []),
-                });
-            } catch (err) {
-                if (!alive) return;
-
-                setError("Không thể tải profile từ server. Đang hiển thị dữ liệu local.");
-                setProfileData({
-                    user,
-                    profile: user?.profile ?? null,
-                    courses: user?.courses ?? [],
-                });
-            } finally {
-                if (alive) setLoading(false);
+                if (res.success) {
+                    setUser(res.data);
+                }
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
             }
         };
 
-        fetchProfile();
-        return () => {
-            alive = false;
-        };
-    }, [username, user]); // ✅ thêm user
+        fetchUser();
+    }, []);
 
-    const displayName = useMemo(() => {
-        const p = profileData?.profile;
-        const u = profileData?.user;
-
-        const fullName = [p?.first_name, p?.last_name].filter(Boolean).join(" ");
-        return fullName || u?.displayName || u?.username || u?.name || "User";
-    }, [profileData]);
-
-    const email = profileData?.user?.email || "";
-    const bio = profileData?.profile?.bio || "Chưa có bio";
-    const avatar =
-        profileData?.profile?.avatar ||
-        profileData?.user?.avatar ||
-        images.noImage;
-
-    const courses = Array.isArray(profileData?.courses) ? profileData.courses : [];
-
-    if (loading) {
-        return (
-            <div className={cx("loading-container")}>
-                <div className={cx("spinner")} />
-                <p>Đang tải thông tin profile...</p>
-            </div>
-        );
+    if (!user) {
+        return <div className={cx('wrapper')}>Loading...</div>;
     }
 
     return (
-        <div className={cx("wrapper")}>
-            {!!error && (
-                <div className={cx("error-banner")}>
-                    <span>⚠️ {error}</span>
-                </div>
-            )}
-
-            <div className={cx("header")}>
-                <div className={cx("avatar-wrapper")}>
-                    <Image className={cx("avatar")} src={avatar} alt={displayName} fallback={images.noImage} />
-                </div>
-
-                <div className={cx("info")}>
-                    <h1 className={cx("display-name")}>{displayName}</h1>
-                    {email && <p className={cx("email")}>{email}</p>}
-                </div>
+        <div className={cx('wrapper')}>
+            <div className={cx('cover')}>
+                <img src={user.coverPhoto} alt="cover" className={cx('cover-img')} />
             </div>
 
-            <div className={cx("section")}>
-                <h2 className={cx("section-title")}>Giới thiệu</h2>
-                <p className={cx("bio")}>{bio}</p>
-            </div>
+            <div className={cx('content')}>
+                <div className={cx('avatar-box')}>
+                    <img src={user.avatar} alt={user.fullName} className={cx('avatar')} />
+                </div>
 
-            <div className={cx("section")}>
-                <h2 className={cx("section-title")}>
-                    Các Khóa Học Đã Tham Gia ({courses.length})
-                </h2>
+                <div className={cx('info')}>
+                    <h2 className={cx('name')}>
+                        {user.fullName}
+                        {user.isVerified && <span className={cx('verified')}>✔</span>}
+                    </h2>
 
-                {courses.length > 0 ? (
-                    <div className={cx("courses-grid")}>
-                        {courses.map((course) => (
-                            <Link
-                                key={course._id}
-                                to={course.slug ? `/course/${course.slug}` : "#"}
-                                className={cx("course-card")}
-                            >
-                                <div className={cx("course-image-wrapper")}>
-                                    <Image
-                                        className={cx("course-image")}
-                                        src={course.image}
-                                        alt={course.courseName}
-                                        fallback={images.noImage}
-                                    />
-                                </div>
+                    <p className={cx('username')}>@{user.username}</p>
+                    <p className={cx('bio')}>{user.bio}</p>
 
-                                <div className={cx("course-content")}>
-                                    <h3 className={cx("course-name")}>{course.courseName}</h3>
-                                    <p className={cx("course-description")}>
-                                        {course.courseDescription}
-                                    </p>
-                                </div>
-                            </Link>
-                        ))}
+                    <div className={cx('detail-list')}>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Số điện thoại:</strong> {user.phone}</p>
+                        <p><strong>Giới tính:</strong> {user.gender}</p>
+                        <p><strong>Ngày sinh:</strong> {user.dateOfBirth}</p>
+                        <p>
+                            <strong>Địa chỉ:</strong> {user.address.street}, {user.address.ward},{' '}
+                            {user.address.district}, {user.address.city}
+                        </p>
+                        <p><strong>Vai trò:</strong> {user.role}</p>
                     </div>
-                ) : (
-                    <div className={cx("empty-state")}>
-                        <p>Chưa tham gia khóa học nào</p>
+
+                    <div className={cx('stats')}>
+                        <div className={cx('stat-item')}>
+                            <strong>{user.stats.followers}</strong>
+                            <span>Followers</span>
+                        </div>
+                        <div className={cx('stat-item')}>
+                            <strong>{user.stats.following}</strong>
+                            <span>Following</span>
+                        </div>
+                        <div className={cx('stat-item')}>
+                            <strong>{user.stats.posts}</strong>
+                            <span>Posts</span>
+                        </div>
                     </div>
-                )}
+
+                    <div className={cx('socials')}>
+                        <a href={user.socials.facebook} target="_blank" rel="noreferrer">
+                            Facebook
+                        </a>
+                        <a href={user.socials.github} target="_blank" rel="noreferrer">
+                            GitHub
+                        </a>
+                        <a href={user.socials.linkedin} target="_blank" rel="noreferrer">
+                            LinkedIn
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     );

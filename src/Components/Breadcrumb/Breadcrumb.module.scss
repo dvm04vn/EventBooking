@@ -1,117 +1,45 @@
-.wrapper {
-  position: relative;
-  z-index: 9999; /* tránh bị lớp khác đè */
+.breadcrumb {
   width: 100%;
-  pointer-events: auto; /* đảm bảo nhận click */
 }
 
 .list {
   display: flex;
   align-items: center;
-  flex-wrap: wrap; /* nếu dài thì xuống dòng */
-  gap: 0; /* sep tự tạo khoảng */
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 0;
   margin: 0;
   list-style: none;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.58);
 }
 
 .item {
   display: inline-flex;
   align-items: center;
-  max-width: 100%;
+  gap: 8px;
 }
 
-/* link & text chung */
-.link,
-.text {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 100%;
-  min-height: 18px;
-  font-size: 12px;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-  user-select: none;
-}
-
-.icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  opacity: 0.95;
-}
-
-.label {
-  display: inline-block;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* clickable link */
 .link {
-  color: rgba(226, 232, 240, 0.75);
+  color: rgba(255, 255, 255, 0.62);
   text-decoration: none;
-  cursor: pointer;
-  pointer-events: auto;
-
-  transition:
-    color 0.16s ease,
-    opacity 0.16s ease;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #e6edf6;
-  }
-
-  &:focus-visible {
-    outline: 2px solid #22d3ee;
-    outline-offset: 2px;
-    border-radius: 6px;
+    color: #ffffff;
   }
 }
 
-/* nếu active mà vẫn cho phép link (allowActiveLink=true) */
-.activeLink {
-  color: rgba(226, 232, 240, 0.92);
+.page {
+  color: #ffffff;
+  font-weight: 500;
 }
 
-/* non-click text */
-.text {
-  color: rgba(226, 232, 240, 0.72);
-}
-
-/* active page label */
-.active {
-  color: #e6edf6;
-  font-weight: 700;
-}
-
-/* disabled item (render span) */
-.disabled {
-  color: rgba(226, 232, 240, 0.35);
-  cursor: not-allowed;
-}
-
-/* separator: không ăn click */
-.sep {
-  margin: 0 10px;
-  color: rgba(226, 232, 240, 0.45);
-  font-size: 12px;
-  line-height: 1;
+.separator {
+  color: rgba(255, 255, 255, 0.4);
   user-select: none;
-  pointer-events: none; /* quan trọng: đừng chặn click của link */
 }
 
-/* Mobile: co khoảng cách lại */
-@media (max-width: 560px) {
-  .sep {
-    margin: 0 8px;
-  }
-  .link,
-  .text {
-    font-size: 11px;
-  }
+.ellipsis {
+  color: rgba(255, 255, 255, 0.5);
 }
