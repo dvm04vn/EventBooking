@@ -7,7 +7,7 @@ import React, {
     useState,
 } from "react";
 
-import { refresh, logout as logoutApi } from "~/Services/AuthService";
+import { refresh, logout as logoutApi } from "~/Services/auth.service";
 import { getMe } from "~/Services/UserService";
 
 const AuthContext = createContext(null);

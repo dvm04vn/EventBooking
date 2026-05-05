@@ -5,7 +5,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import styles from "./Register.module.scss";
-import { register as registerApi } from "~/Services/AuthService"; // ✅ bạn cần có hàm register
+import { register as registerApi } from "~/Services/auth.service"; // ✅ bạn cần có hàm register
 import { useAuth } from "~/context/AuthContext";
 
 const cx = classNames.bind(styles);

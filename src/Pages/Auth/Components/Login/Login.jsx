@@ -4,7 +4,7 @@ import { RiLoader2Fill } from "react-icons/ri";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 import styles from "./Login.module.scss";
-import { login } from "~/Services/AuthService";
+import { login } from "~/Services/auth.service";
 
 const cx = classNames.bind(styles);
 

@@ -31,7 +31,7 @@ export const PublicRouter = [
     layout: DefaultLayout,
   },
   {
-    path: "/events/:eventId",
+    path: "/events/:id",
     component: EventDetail,
     layout: DetailLayout,
   },

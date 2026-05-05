@@ -1,260 +1,426 @@
-import { useCallback, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import classNames from "classnames/bind";
-import styles from "./Payment.module.scss";
-
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import classNames from 'classnames/bind';
+import { FiCalendar, FiMapPin } from 'react-icons/fi';
+import styles from './Payment.module.scss';
 import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "~/Components/Breadcrumb";
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from '~/components/Breadcrumb';
 
 const cx = classNames.bind(styles);
 
-const PAYMENT_DATA = {
-  1: {
-    id: 1,
-    title: "The Eras Tour - Taylor Swift",
-    dateText: "28 Tháng 12, 2024",
-    venue: "Sân vận động Quốc gia, Singapore",
-    items: [
-      { id: "ticket", label: "Vé (2 × 1.500.000đ)", amount: 3000000 },
-      { id: "fee", label: "Phí dịch vụ", amount: 50000 },
-    ],
-  },
-  5: {
-    id: 5,
-    title: "Ravolution Music Festival",
-    dateText: "14 Tháng 12, 2024",
-    venue: "SECC, Quận 7, TP.HCM",
-    items: [
-      { id: "ticket", label: "Vé (2 × 800.000đ)", amount: 1600000 },
-      { id: "fee", label: "Phí dịch vụ", amount: 50000 },
-    ],
-  },
+// ─── Mock Data ────────────────────────────────────────────────────────────────
+
+// Fallback khi không có Router state (dev/test trực tiếp)
+export const MOCK_ORDER = {
+    success: true,
+    message: 'Lấy dữ liệu thành công',
+    data: {
+        event: {
+            id: 'eras-tour-2024',
+            title: 'The Eras Tour - Taylor Swift',
+            date: '28 Tháng 12, 2024',
+            location: 'Sân vận động Quốc gia, Singapore',
+        },
+        tickets: [
+            { id: 'vip', name: 'Vé VIP', quantity: 2, price: 1500000 },
+        ],
+        serviceFee: 50000,
+    },
 };
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const PAYMENT_METHODS = [
-  {
-    id: "momo",
-    name: "Ví MoMo",
-    icon: "💙",
-  },
-  {
-    id: "zalopay",
-    name: "Ví ZaloPay",
-    icon: "🟦",
-  },
-  {
-    id: "vnpay",
-    name: "Ví VNPay",
-    icon: "💳",
-  },
+    { id: 'momo',    label: 'Ví MoMo',    badge: 'M' },
+    { id: 'zalopay', label: 'Ví ZaloPay', badge: 'Z' },
+    { id: 'vnpay',   label: 'Ví VNPay',   badge: 'V' },
 ];
 
+const INITIAL_FORM = { fullName: '', phone: '', email: '' };
+const INITIAL_ERRORS = { fullName: '', phone: '', email: '' };
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function formatCurrency(value) {
-  return `${value.toLocaleString("vi-VN")}đ`;
+    return `${new Intl.NumberFormat('vi-VN').format(value)}đ`;
 }
 
+function validateForm(formData) {
+    const errors = { ...INITIAL_ERRORS };
+    let isValid = true;
+
+    if (!formData.fullName.trim()) {
+        errors.fullName = 'Vui lòng nhập họ và tên.';
+        isValid = false;
+    }
+
+    const phoneRegex = /^(0[3|5|7|8|9])[0-9]{8}$/;
+    if (!formData.phone.trim()) {
+        errors.phone = 'Vui lòng nhập số điện thoại.';
+        isValid = false;
+    } else if (!phoneRegex.test(formData.phone)) {
+        errors.phone = 'Số điện thoại không hợp lệ.';
+        isValid = false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+        errors.email = 'Vui lòng nhập email.';
+        isValid = false;
+    } else if (!emailRegex.test(formData.email)) {
+        errors.email = 'Email không hợp lệ.';
+        isValid = false;
+    }
+
+    return { errors, isValid };
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 function Payment() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+    const location = useLocation();
 
-  const event = PAYMENT_DATA[id] || PAYMENT_DATA[1];
+    const [orderInfo, setOrderInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    fullName: "",
-    phone: "",
-    email: "",
-  });
-  const [method, setMethod] = useState("momo");
-  const [agreed, setAgreed] = useState(false);
+    const [formData, setFormData] = useState(INITIAL_FORM);
+    const [errors, setErrors] = useState(INITIAL_ERRORS);
+    const [touched, setTouched] = useState({});
 
-  const total = useMemo(() => {
-    return event.items.reduce((sum, item) => sum + item.amount, 0);
-  }, [event.items]);
+    const [selectedPayment, setSelectedPayment] = useState('momo');
+    const [agreed, setAgreed] = useState(false);
 
-  const isFormValid =
-    form.fullName.trim() &&
-    form.phone.trim() &&
-    form.email.trim() &&
-    agreed &&
-    method;
+    // ─── Fetch order info ──────────────────────────────────────────────────
 
-  const handleChange = useCallback((field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  }, []);
+    useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                setLoading(true);
 
-  const handleSubmit = useCallback(() => {
-    if (!isFormValid) return;
-    navigate(`/events/${event.id}/success`);
-  }, [event.id, isFormValid, navigate]);
+                // Ưu tiên data từ Router state (truyền từ Booking)
+                if (location.state?.orderInfo) {
+                    setOrderInfo(location.state.orderInfo);
+                } else {
+                    // Fallback: gọi API hoặc dùng mock
+                    // const result = await getOrder();
+                    const result = MOCK_ORDER;
+                    if (result.success) {
+                        setOrderInfo(result.data);
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  return (
-    <main className={cx("page")}>
-      <div className={cx("container")}>
-        <Breadcrumb className={cx("breadcrumb")}>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink to={`/events/${event.id}/booking`}>
-                Chọn vé
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+        fetchOrder();
+    }, [location.state]);
 
-            <BreadcrumbSeparator />
+    // ─── Derived ───────────────────────────────────────────────────────────
 
-            <BreadcrumbItem>
-              <BreadcrumbPage>Thông tin & Thanh toán</BreadcrumbPage>
-            </BreadcrumbItem>
+    const ticketTotal = orderInfo?.tickets?.reduce(
+        (sum, t) => sum + t.price * t.quantity,
+        0,
+    ) ?? 0;
 
-            <BreadcrumbSeparator />
+    const grandTotal = ticketTotal + (orderInfo?.serviceFee ?? 0);
 
-            <BreadcrumbItem>
-              <span className={cx("breadcrumbText")}>Hoàn thành</span>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    const canSubmit = agreed && selectedPayment && !submitting;
 
-        <h1 className={cx("title")}>Thông tin & Thanh toán</h1>
+    // ─── Handlers ──────────────────────────────────────────────────────────
 
-        <div className={cx("layout")}>
-          <div className={cx("main")}>
-            <section className={cx("card")}>
-              <h2 className={cx("cardTitle")}>Thông tin liên hệ</h2>
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
 
-              <div className={cx("formGrid")}>
-                <div className={cx("field")}>
-                  <label className={cx("label")} htmlFor="fullName">
-                    Họ và Tên
-                  </label>
-                  <input
-                    id="fullName"
-                    type="text"
-                    className={cx("input")}
-                    value={form.fullName}
-                    onChange={(e) => handleChange("fullName", e.target.value)}
-                  />
+        // Clear error khi user bắt đầu sửa
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handleBlur = (e) => {
+        const { name } = e.target;
+        setTouched((prev) => ({ ...prev, [name]: true }));
+
+        const { errors: newErrors } = validateForm(formData);
+        setErrors((prev) => ({ ...prev, [name]: newErrors[name] }));
+    };
+
+    const handleSubmit = async () => {
+        // Validate toàn bộ form trước khi submit
+        const { errors: newErrors, isValid } = validateForm(formData);
+        setErrors(newErrors);
+        setTouched({ fullName: true, phone: true, email: true });
+
+        if (!isValid || !agreed || !selectedPayment) return;
+
+        try {
+            setSubmitting(true);
+            // await submitPayment({ ...formData, selectedPayment, orderInfo });
+            console.log('Submit:', { formData, selectedPayment, orderInfo });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // ─── Early returns ─────────────────────────────────────────────────────
+
+    if (loading) {
+        return (
+            <main className={cx('wrapper')}>
+                <div className={cx('container')}>
+                    <p className={cx('loadingText')}>Đang tải...</p>
                 </div>
+            </main>
+        );
+    }
 
-                <div className={cx("field")}>
-                  <label className={cx("label")} htmlFor="phone">
-                    Số điện thoại
-                  </label>
-                  <input
-                    id="phone"
-                    type="text"
-                    className={cx("input")}
-                    value={form.phone}
-                    onChange={(e) => handleChange("phone", e.target.value)}
-                  />
+    // ─── JSX ───────────────────────────────────────────────────────────────
+
+    return (
+        <main className={cx('wrapper')}>
+            <div className={cx('container')}>
+
+                {/* Breadcrumb */}
+                <Breadcrumb className={cx('breadcrumb')}>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink to={`/events/${orderInfo?.event?.id}/booking`}>
+                                Chọn vé
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+
+                        <BreadcrumbSeparator />
+
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>Thông tin & Thanh toán</BreadcrumbPage>
+                        </BreadcrumbItem>
+
+                        <BreadcrumbSeparator />
+
+                        <BreadcrumbItem>
+                            <span className={cx('breadcrumbText')}>Hoàn thành</span>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
+
+                {/* Page Header */}
+                <header className={cx('pageHeader')}>
+                    <h1>Thông tin & Thanh toán</h1>
+                </header>
+
+                <div className={cx('layout')}>
+                    {/* ── Main Column ── */}
+                    <div className={cx('mainColumn')}>
+
+                        {/* Contact Info */}
+                        <section className={cx('card')}>
+                            <div className={cx('cardHeader')}>
+                                <h2>Thông tin liên hệ</h2>
+                            </div>
+
+                            <div className={cx('cardBody')}>
+                                <div className={cx('formRow')}>
+                                    <div className={cx('formGroup')}>
+                                        <label htmlFor="fullName">Họ và Tên</label>
+                                        <input
+                                            id="fullName"
+                                            name="fullName"
+                                            type="text"
+                                            value={formData.fullName}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            className={cx('input', {
+                                                inputError: touched.fullName && errors.fullName,
+                                            })}
+                                            autoComplete="name"
+                                        />
+                                        {touched.fullName && errors.fullName && (
+                                            <span className={cx('errorText')}>{errors.fullName}</span>
+                                        )}
+                                    </div>
+
+                                    <div className={cx('formGroup')}>
+                                        <label htmlFor="phone">Số điện thoại</label>
+                                        <input
+                                            id="phone"
+                                            name="phone"
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            onBlur={handleBlur}
+                                            className={cx('input', {
+                                                inputError: touched.phone && errors.phone,
+                                            })}
+                                            autoComplete="tel"
+                                        />
+                                        {touched.phone && errors.phone && (
+                                            <span className={cx('errorText')}>{errors.phone}</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className={cx('formGroup')}>
+                                    <label htmlFor="email">Email</label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        className={cx('input', {
+                                            inputError: touched.email && errors.email,
+                                        })}
+                                        autoComplete="email"
+                                    />
+                                    {touched.email && errors.email && (
+                                        <span className={cx('errorText')}>{errors.email}</span>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Payment Methods */}
+                        <section className={cx('card')}>
+                            <div className={cx('cardHeader')}>
+                                <h2>Chọn phương thức thanh toán</h2>
+                            </div>
+
+                            <div className={cx('cardBody', 'paymentBody')}>
+                                {PAYMENT_METHODS.map((method) => {
+                                    const isSelected = selectedPayment === method.id;
+
+                                    return (
+                                        <label
+                                            key={method.id}
+                                            className={cx('paymentOption', {
+                                                paymentSelected: isSelected,
+                                            })}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="paymentMethod"
+                                                value={method.id}
+                                                checked={isSelected}
+                                                onChange={() => setSelectedPayment(method.id)}
+                                                className={cx('radioInput')}
+                                            />
+                                            <span className={cx('radioControl')} />
+                                            <span
+                                                className={cx('paymentBadge', `badge-${method.id}`)}
+                                            >
+                                                {method.badge}
+                                            </span>
+                                            <span className={cx('paymentLabel')}>
+                                                {method.label}
+                                            </span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* ── Summary Sidebar ── */}
+                    <aside className={cx('summaryCard')}>
+                        <div className={cx('summaryHeader')}>
+                            <h2>Tóm tắt đơn hàng</h2>
+                        </div>
+
+                        <div className={cx('summaryBody')}>
+                            {/* Event Info */}
+                            <div className={cx('eventInfo')}>
+                                <p className={cx('eventTitle')}>{orderInfo?.event?.title}</p>
+
+                                <div className={cx('eventMeta')}>
+                                    <span>
+                                        <FiCalendar />
+                                        {orderInfo?.event?.date}
+                                    </span>
+                                    <span>
+                                        <FiMapPin />
+                                        {orderInfo?.event?.location}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className={cx('divider')} />
+
+                            {/* Order Rows */}
+                            <div className={cx('summaryRows')}>
+                                {orderInfo?.tickets?.map((ticket) => (
+                                    <div key={ticket.id} className={cx('summaryRow')}>
+                                        <span>
+                                            {ticket.name} ({ticket.quantity} ×{' '}
+                                            {formatCurrency(ticket.price)})
+                                        </span>
+                                        <strong>
+                                            {formatCurrency(ticket.price * ticket.quantity)}
+                                        </strong>
+                                    </div>
+                                ))}
+
+                                <div className={cx('summaryRow')}>
+                                    <span>Phí dịch vụ</span>
+                                    <strong>{formatCurrency(orderInfo?.serviceFee ?? 0)}</strong>
+                                </div>
+                            </div>
+
+                            <div className={cx('divider')} />
+
+                            {/* Total */}
+                            <div className={cx('totalRow')}>
+                                <span>Tổng cộng</span>
+                                <strong className={cx('totalAmount')}>
+                                    {formatCurrency(grandTotal)}
+                                </strong>
+                            </div>
+
+                            {/* Terms */}
+                            <label className={cx('termsRow')}>
+                                <input
+                                    type="checkbox"
+                                    checked={agreed}
+                                    onChange={(e) => setAgreed(e.target.checked)}
+                                    className={cx('checkbox')}
+                                />
+                                <span className={cx('termsText')}>
+                                    Tôi đã đọc và đồng ý với{' '}
+                                    <Link to="/terms" className={cx('termsLink')}>
+                                        Điều khoản &amp; Dịch vụ
+                                    </Link>{' '}
+                                    của EventBooking.
+                                </span>
+                            </label>
+
+                            {/* Submit */}
+                            <button
+                                type="button"
+                                className={cx('submitButton')}
+                                disabled={!canSubmit}
+                                onClick={handleSubmit}
+                            >
+                                {submitting ? 'Đang xử lý...' : 'Thanh toán'}
+                            </button>
+                        </div>
+                    </aside>
                 </div>
-
-                <div className={cx("field", "full")}>
-                  <label className={cx("label")} htmlFor="email">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    className={cx("input")}
-                    value={form.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className={cx("card")}>
-              <h2 className={cx("cardTitle")}>Chọn phương thức thanh toán</h2>
-
-              <div className={cx("methodList")}>
-                {PAYMENT_METHODS.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={cx("methodItem", {
-                      active: method === item.id,
-                    })}
-                    onClick={() => setMethod(item.id)}
-                  >
-                    <span className={cx("radio", { checked: method === item.id })}>
-                      <span className={cx("radioDot")} />
-                    </span>
-
-                    <span className={cx("methodIcon")}>{item.icon}</span>
-
-                    <span className={cx("methodName")}>{item.name}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </div>
-
-          <aside className={cx("sidebar")}>
-            <section className={cx("summary")}>
-              <h2 className={cx("summaryTitle")}>Tóm tắt đơn hàng</h2>
-
-              <div className={cx("eventBox")}>
-                <h3 className={cx("eventTitle")}>Sự kiện: {event.title}</h3>
-
-                <div className={cx("eventMeta")}>
-                  <span>{event.dateText}</span>
-                </div>
-
-                <div className={cx("eventMeta")}>
-                  <span>{event.venue}</span>
-                </div>
-              </div>
-
-              <div className={cx("summaryList")}>
-                {event.items.map((item) => (
-                  <div key={item.id} className={cx("summaryRow")}>
-                    <span>{item.label}</span>
-                    <span>{formatCurrency(item.amount)}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className={cx("summaryTotal")}>
-                <span>Tổng cộng</span>
-                <strong>{formatCurrency(total)}</strong>
-              </div>
-
-              <label className={cx("agreeBox")}>
-                <input
-                  type="checkbox"
-                  checked={agreed}
-                  onChange={(e) => setAgreed(e.target.checked)}
-                />
-                <span>
-                  Tôi đã đọc và đồng ý với{" "}
-                  <span className={cx("linkText")}>
-                    Điều khoản & Dịch vụ
-                  </span>{" "}
-                  của EventBooking.
-                </span>
-              </label>
-
-              <button
-                type="button"
-                className={cx("payBtn")}
-                onClick={handleSubmit}
-                disabled={!isFormValid}
-              >
-                Thanh toán
-              </button>
-            </section>
-          </aside>
-        </div>
-      </div>
-    </main>
-  );
+            </div>
+        </main>
+    );
 }
 
 export default Payment;
