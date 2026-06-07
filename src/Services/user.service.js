@@ -1,18 +1,12 @@
-import { GET } from "~/Util/HttpsRequest";
+import * as Response from '~/Util/HttpsRequest'
 
-/**
- * Lấy thông tin user đang đăng nhập (me)
- * Thường backend dùng: GET /auth/me
- */
-export const getMe = async (config = {}) => {
+export const getMe = async() => {
     try {
-        const res = await GET({
-            path: "/auth/me",
-            config,
-        });
-        return res; // AxiosResponse
+        const res = await Response.POST('user/me');
+        return res;
     } catch (error) {
-        console.error("getMe error:", error);
-        throw error;
+        const status = error?.status || error?.response?.status;
+        const data = error?.response?.data;
+        return {...data, status};
     }
-};
+}

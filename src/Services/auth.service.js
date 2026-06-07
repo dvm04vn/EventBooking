@@ -1,64 +1,35 @@
-import { POST } from "~/Util/HttpsRequest";
+import * as Response from '~/Util/HttpsRequest';
 
-export const login = async (email, password, config = {}) => {
-  try {
-    const res = await POST({
-      path: "/auth/login",
-      data: { email, password },
-      config,
-    });
-    return res;
-  } catch (error) {
-    console.error("Login error:", error);
-    throw error;
-  }
-};
-
-export const register = async (username, email, password, config = {}) => {
-  try {
-    const res = await POST({
-      path: "/auth/register",
-      data: { username, email, password },
-      config,
-    });
-    return res;
-  } catch (error) {
-    console.error("Register error:", error);
-    throw error;
-  }
-};
-
-export const logout = async (config = {}) => {
-  try {
-    const res = await POST({
-      path: "/auth/logout",
-      data: undefined, // hoặc {} nếu backend cần body
-      config,
-    });
-    return res;
-  } catch (error) {
-    console.error("Logout error:", error);
-    throw error;
-  }
-};
-export const refresh = async () => {
-  try {
-    const res = await POST("auth/refresh");
-    return res.data;
-  } catch (error) {
-    // network / CORS / server down
-    if (!error?.response) {
-      throw new Error("Network error");
+export const login = async ({email, password}) => {
+    try {
+        const res = await Response.POST('/auth/login', {email,password});
+        return res;
+    } catch (error) {
+        const status = error?.status || error?.response?.status;
+        const data = error?.response?.data;
+        return {...data, status};
     }
+}
 
-    const status = error.response.status;
-    const message = error.response.data?.message || "Refresh failed";
-
-    // Token invalid/expired -> auth fail
-    if (status === 401 || /jwt/i.test(message)) {
-      throw new Error("jwt expired");
+export const register = async({full_name, email, password}) => {
+    try {
+        const res = await Response.POST('/auth/register', {full_name, email, password});
+        return res;
+    } catch (error) {
+        const status = error?.status || error?.response?.status;
+        const data = error?.response?.data;
+        return {...data, status};
     }
+}
 
-    throw new Error(message);
-  }
-};
+export const logout = async() => {
+    try {
+        const res = await Response.POST('/auth/logout');
+        return res;
+    } catch (error) {
+        const status = error?.status || error?.response?.status;
+        const data = error?.response?.data;
+        return {...data, status};
+    }
+}
+

@@ -24,13 +24,9 @@ function HeaderDefault() {
   return (
     <header className={cx("wrapper")}>
       <div className={cx("container")}>
-        <h1 className={cx('logo')}>
+        <h1 className={cx("logo")}>
           <Link to="/" className={cx("logoLeft")}>
-            <img
-              src={images.LogoUrl}
-              alt="Logo"
-              className={cx("logoImg")}
-            />
+            <img src={images.LogoUrl} alt="Logo" className={cx("logoImg")} />
             <span className={cx("logoText")}>EventBooking</span>
           </Link>
         </h1>
@@ -50,10 +46,18 @@ function HeaderDefault() {
         </nav>
 
         <div className={cx("auth")}>
-          <Button outline className={cx("btn_dangki")} onClick={() => navigate("/register")}>
+          <Button
+            outline
+            className={cx("btn_dangki")}
+            onClick={() => navigate("/register")}
+          >
             Đăng ký
           </Button>
-          <Button primary className={cx("btn_dangnhap")} onClick={() => navigate("/login")}>
+          <Button
+            primary
+            className={cx("btn_dangnhap")}
+            onClick={() => navigate("/login")}
+          >
             Đăng nhập
           </Button>
         </div>

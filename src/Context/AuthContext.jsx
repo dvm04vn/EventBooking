@@ -1,85 +1,80 @@
 import React, {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
 
-import { refresh, logout as logoutApi } from "~/Services/auth.service";
-import { getMe } from "~/Services/UserService";
+import { getProfile } from "~/Services/profile.service";
 
 const AuthContext = createContext(null);
 
 export const useAuth = () => {
-    const ctx = useContext(AuthContext);
-    if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
-    return ctx;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
+  return ctx;
 };
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isInitialized, setIsInitialized] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-    const logoutLocal = useCallback(() => {
-        localStorage.removeItem("accessToken");
-        setUser(null);
-    }, []);
+  const clearAuthState = useCallback(() => {
+    localStorage.removeItem("accessToken");
+    setUser(null);
+  });
 
-    const initializeAuth = useCallback(async () => {
-        setIsLoading(true);
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-            logoutLocal();
-            setIsLoading(false);
-            setIsInitialized(true);
-            return;
+  const initializeAuth = useCallback(async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setUser(null);
+      setIsInitialized(true);
+      return null;
+    }
+    try {
+      setIsLoading(true);
+
+      const meRes = await getProfile();
+      const me = meRes?.data ?? meRes ?? null;
+
+      if (!meRes?.success) {
+        if (meRes?.status === 401) {
+          setUser(null);
+          return null;
         }
-        try {
-            const data = await refresh();
-            const newToken =
-                data?.meta?.newAccessToken || data?.accessToken || data?.token;
-            if (newToken) localStorage.setItem("accessToken", newToken);
-            const res = await getMe();
-            const me = res?.data ?? res ?? null;
-            if (!me) logoutLocal();
-            else setUser(me);
-        } catch (err) {
-            console.error("Auth init failed:", err?.message);
-            logoutLocal();
-        } finally {
-            setIsLoading(false);
-            setIsInitialized(true);
-        }
-    }, [logoutLocal]);
+        throw new Error(meRes?.message || "Không thể khởi tạo phiên đăng nhập");
+      }
+      setUser(me);
+      return me;
+    } catch (error) {
+      console.log(error);
+      setUser(null);
+      return null;
+    } finally {
+      setIsLoading(false);
+      setIsInitialized(true);
+    }
+  }, []);
 
-    const logout = useCallback(async () => {
-        try {
-            await logoutApi();
-        } catch (err) {
-            console.error("Logout API failed:", err?.message);
-        } finally {
-            logoutLocal();
-        }
-    }, [logoutLocal]);
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
-    useEffect(() => {
-        initializeAuth();
-    }, [initializeAuth]);
+  const value = useMemo(
+    () => ({
+      user,
+      setUser,
+      clearAuthState,
+      isAuthenticated: !!user,
+      isLoading,
+      isInitialized,
+      initializeAuth,
+    }),
+    [user, isLoading, isInitialized, initializeAuth, clearAuthState],
+  );
 
-    const value = useMemo(
-        () => ({
-            user,
-            isAuthenticated: !!user,
-            isLoading,
-            isInitialized,
-            initializeAuth,
-            logout,
-        }),
-        [user, isLoading, isInitialized, initializeAuth, logout]
-    );
-
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

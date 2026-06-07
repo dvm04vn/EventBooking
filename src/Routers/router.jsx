@@ -3,7 +3,6 @@ import Home from "~/Pages/Home";
 import Events from "~/Pages/Events";
 import EventDetail from "~/Pages/EventDetail";
 import CheckoutSuccess from "~/Pages/CheckoutSuccess";
-import Auth from "~/Pages/Auth";
 import Profile from "~/Pages/Profile/Profile";
 import About from "~/Pages/About";
 import Booking from "~/Pages/Booking";
@@ -11,6 +10,8 @@ import Payment from "~/Pages/Payment";
 // improt layout
 import DetailLayout from "~/Layout/DetailLayout";
 import DefaultLayout from "~/Layout/DefaultLayout";
+import Login from "~/Pages/Login";
+import Register from "~/Pages/Register";
 
 
 // PUBLIC ROUTES
@@ -52,12 +53,12 @@ export const PublicRouter = [
   },
   {
     path: "/login",
-    component: Auth,
+    component: Login,
     layout: DetailLayout,
   },
   {
     path: "/register",
-    component: Auth,
+    component: Register,
     layout: DetailLayout,
   },
   {

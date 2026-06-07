@@ -1,0 +1,122 @@
+.wrapper {
+    min-height: 100vh;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at top, rgba(37, 99, 235, 0.26), transparent 36%),
+        #020617;
+}
+
+.brand {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.brandLink {
+    color: #38bdf8;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    text-decoration: none;
+
+    span {
+        color: #ffffff;
+    }
+
+    &:hover {
+        color: #7dd3fc;
+    }
+}
+
+.card {
+    width: 100%;
+    max-width: 460px;
+    padding: 30px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 22px;
+    background-color: rgba(15, 23, 42, 0.9);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.cardHeader {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.cardTitle {
+    margin: 0 0 8px;
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.cardDesc {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.cardBody {
+    width: 100%;
+}
+
+.cardFooter {
+    margin-top: 24px;
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    font-size: 14px;
+
+    a {
+        color: #38bdf8;
+        font-weight: 900;
+        text-decoration: none;
+
+        &:hover {
+            color: #7dd3fc;
+            text-decoration: underline;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .wrapper {
+        padding: 24px 14px;
+    }
+
+    .brand {
+        margin-bottom: 20px;
+    }
+
+    .brandLink {
+        font-size: 25px;
+    }
+
+    .card {
+        padding: 24px 18px;
+        border-radius: 18px;
+    }
+
+    .cardTitle {
+        font-size: 24px;
+    }
+
+    .cardDesc {
+        font-size: 13px;
+    }
+
+    .cardFooter {
+        flex-wrap: wrap;
+        row-gap: 6px;
+        font-size: 13px;
+    }
+}
